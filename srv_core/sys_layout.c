@@ -127,90 +127,90 @@ int build_partitions_(struct sys_layout *self, const struct sys_hw_config *hw_co
 
 static int build_hw_tasks_(struct sys_layout *self, const char *hw_tasks_file)
 {
-    int retval = 0;
-    struct tokens *tokens;
+	int retval = 0;
+	struct tokens *tokens;
 
-    char hw_tasks_path[MAX_PATH];
+	char hw_tasks_path[MAX_PATH];
 
-    struct partition *partition = NULL;
-    const char *hw_task_name = NULL;
-    uint32_t hw_task_id;
-    uint32_t hw_task_timout_ms;
-    const char *part_name = NULL;
-    const char *bits_path = NULL;
-    int data_buffs_count;
-    unsigned int data_buff_size;
+	struct partition *partition = NULL;
+	const char *hw_task_name = NULL;
+	uint32_t hw_task_id;
+	uint32_t hw_task_timout_ms;
+	const char *part_name = NULL;
+	const char *bits_path = NULL;
+	int data_buffs_count;
+	unsigned int data_buff_size;
 
-    DBG_PRINT("fred_sys: building hw-tasks\n");
+	DBG_PRINT("fred_sys: building hw-tasks\n");
 
-    // Read hw-tasks tokens
-    // FRED_PATH is not inserted by the user but chosen at compile time
-    strcpy(hw_tasks_path, FRED_PATH);
-    strncat(hw_tasks_path, hw_tasks_file, sizeof(hw_tasks_path) - strlen(hw_tasks_path) - 1);
-    retval = pars_tokenize(&tokens, hw_tasks_path);
-    if (retval < 0)
-        return -1;
+	// Read hw-tasks tokens
+	// FRED_PATH is not inserted by the user but chosen at compile time
+	strcpy(hw_tasks_path, FRED_PATH);
+	strncat(hw_tasks_path, hw_tasks_file, sizeof(hw_tasks_path) - strlen(hw_tasks_path) - 1);
+	retval = pars_tokenize(&tokens, hw_tasks_path);
+	if (retval < 0)
+		return -1;
 
-    // One line for each hw-task
-    self->hw_tasks_count = pars_get_num_lines(tokens);
-    if (self->hw_tasks_count >= MAX_HW_TASKS) {
-        ERROR_PRINT("fred_sys: maximum number of hw-task exceeded\n");
-        pars_free_tokens(tokens);
-        return -1;
-    }
+	// One line for each hw-task
+	self->hw_tasks_count = pars_get_num_lines(tokens);
+	if (self->hw_tasks_count >= MAX_HW_TASKS) {
+		ERROR_PRINT("fred_sys: maximum number of hw-task exceeded\n");
+		pars_free_tokens(tokens);
+		return -1;
+	}
 
-    // Populate hw-tasks array
-    for (int i = 0; i < self->hw_tasks_count; ++i) {
+	// Populate hw-tasks array
+	for (int i = 0; i < self->hw_tasks_count; ++i) {
 
-        // Get hw-task name (first token in the line)
-        hw_task_name = pars_get_token(tokens, i, 0);
-        // Get hw-task id (second token in the line),
-        hw_task_id = str_to_uint32_(pars_get_token(tokens, i, 1));
-        // Get hw-task timeout in milliseconds (third token in the line),
-        hw_task_timout_ms = str_to_uint32_(pars_get_token(tokens, i, 2));
-        // Get hw-task partition (fourth token)
-        part_name = pars_get_token(tokens, i, 3);
-        // Get bitstreams sub-path path (fifth token)
-        bits_path = pars_get_token(tokens, i, 4);
+		// Get hw-task name (first token in the line)
+		hw_task_name = pars_get_token(tokens, i, 0);
+		// Get hw-task id (second token in the line),
+		hw_task_id = str_to_uint32_(pars_get_token(tokens, i, 1));
+		// Get hw-task timeout in milliseconds (third token in the line),
+		hw_task_timout_ms = str_to_uint32_(pars_get_token(tokens, i, 2));
+		// Get hw-task partition (fourth token)
+		part_name = pars_get_token(tokens, i, 3);
+		// Get bitstreams sub-path path (fifth token)
+		bits_path = pars_get_token(tokens, i, 4);
 
-        // Find partition
-        for (int j = 0; j < self->partitions_count; ++j) {
-            if (!strncmp(part_name, partition_get_name(self->partitions[j]),MAX_NAMES)) {
-                partition = self->partitions[j];
-                break;
-            }
-        }
+		// Find partition
+		for (int j = 0; j < self->partitions_count; ++j) {
+			if (!strncmp(part_name, partition_get_name(self->partitions[j]),MAX_NAMES)) {
+				partition = self->partitions[j];
+				break;
+			}
+		}
 
-        // If no partition has been found
-        if (!partition) {
-            ERROR_PRINT("fred_sys: error: partition not found for HW-task %s\n", hw_task_name);
-            pars_free_tokens(tokens);
-            return -1;
-        }
+		// If no partition has been found
+		if (!partition) {
+			ERROR_PRINT("fred_sys: error: partition not found for HW-task %s\n", hw_task_name);
+			pars_free_tokens(tokens);
+			return -1;
+		}
 
-        // Initialize hw-task
-        retval = hw_task_init(&self->hw_tasks[i], hw_task_id,
-                                hw_task_name, bits_path, partition, self->buffctl);
-        if (retval) {
-            ERROR_PRINT("fred_sys: error: unable to initialize HW-task %s\n", hw_task_name);
-            pars_free_tokens(tokens);
-            return -1;
-        }
+		// Initialize hw-task
+		retval = hw_task_init(&self->hw_tasks[i], hw_task_id,
+								hw_task_name, bits_path, partition, self->buffctl);
+		if (retval) {
+			ERROR_PRINT("fred_sys: error: unable to initialize HW-task %s\n", hw_task_name);
+			pars_free_tokens(tokens);
+			return -1;
+		}
 
-        // Set hw-task timeout
-        if (hw_task_timout_ms != 0)
-            hw_task_set_timeout_us(self->hw_tasks[i], hw_task_timout_ms * 1000);
+		// Set hw-task timeout
+		if (hw_task_timout_ms != 0)
+			hw_task_set_timeout_us(self->hw_tasks[i], hw_task_timout_ms * 1000);
 
-        // The reminder tokens (after fourth initial tokens) define the buffers
-        data_buffs_count = pars_get_num_tokens(tokens, i) - 5;
-        for (int b = 0; b < data_buffs_count; ++b) {
-            data_buff_size = str_to_size_(pars_get_token(tokens, i, b + 5));
-            retval = hw_task_add_buffer(self->hw_tasks[i], data_buff_size);
-            if (retval)
-                return -1;
-        }
-    }
-    return 0;
+		// The reminder tokens (after fourth initial tokens) define the buffers
+		data_buffs_count = pars_get_num_tokens(tokens, i) - 5;
+		for (int b = 0; b < data_buffs_count; ++b) {
+			data_buff_size = str_to_size_(pars_get_token(tokens, i, b + 5));
+			retval = hw_task_add_buffer(self->hw_tasks[i], data_buff_size);
+			if (retval)
+				return -1;
+		}
+	}
+	return 0;
 }
 
 //---------------------------------------------------------------------------------------------
