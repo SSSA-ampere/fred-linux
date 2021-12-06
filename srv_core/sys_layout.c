@@ -166,7 +166,7 @@ static int build_hw_tasks_(struct sys_layout *self, const char *hw_tasks_file)
 		hw_task_name = pars_get_token(tokens, i, 0);
 		// Get hw-task id (second token in the line),
 		hw_task_id = str_to_uint32_(pars_get_token(tokens, i, 1));
-		// Get hw-task timeout in milliseconds (third token in the line),
+		// Get hw-task timeout in microseconds (third token in the line),
 		hw_task_timout_us = str_to_uint32_(pars_get_token(tokens, i, 2));
 		// Get hw-task partition (fourth token)
 		part_name = pars_get_token(tokens, i, 3);
