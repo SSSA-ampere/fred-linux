@@ -21,3 +21,6 @@ $(BIN): $(OBJS)
 clean:
 	rm -f $(BIN) $(OBJS) $(DEPS)
 
+install:
+	mkdir -p ${FRED_PATH}/bin
+	cp ${BIN} ${FRED_PATH}/bin
