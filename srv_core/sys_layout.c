@@ -47,82 +47,82 @@ static
 int build_partitions_(struct sys_layout *self, const struct sys_hw_config *hw_config,
                         const char *arch_file, struct scheduler *scheduler)
 {
-    int retval = 0;
-    char arch_path[MAX_PATH];
-    struct tokens *tokens;
+	int retval = 0;
+	char arch_path[MAX_PATH];
+	struct tokens *tokens;
 
-    const char *part_name;
-    int part_slots_count;
+	const char *part_name;
+	int part_slots_count;
 
-    struct slot *slot;
-    struct slot_timer *timer;
-    char dev_name[MAX_NAMES];
-    char dec_name[MAX_NAMES];
+	struct slot *slot;
+	struct slot_timer *timer;
+	char dev_name[MAX_NAMES];
+	char dec_name[MAX_NAMES];
 
-    DBG_PRINT("fred_sys: building partitions\n");
+	DBG_PRINT("fred_sys: building partitions\n");
 
-    // Read arch file tokens
-    // FRED_PATH is not inserted by the user but chosen at compile time
-    strcpy(arch_path, FRED_PATH);
-    strncat(arch_path, arch_file, sizeof(arch_path) - strlen(arch_path) - 1);
-    retval = pars_tokenize(&tokens, arch_path);
-    if (retval < 0)
-        return -1;
+	// Read arch file tokens
+	// FRED_PATH is not inserted by the user but chosen at compile time
+	strcpy(arch_path, STR(FRED_PATH));
+	strncat(arch_path, arch_file, sizeof(arch_path) - strlen(arch_path) - 1);
+	retval = pars_tokenize(&tokens, arch_path);
+	if (retval < 0)
+		return -1;
 
-    // Partition file contains one line per partition
-    self->partitions_count = pars_get_num_lines(tokens);
-    if (self->partitions_count >= MAX_PARTITIONS) {
-        ERROR_PRINT("fred_sys: maximum number of partitions exceeded\n");
-        pars_free_tokens(tokens);
-        return -1;
-    }
+	// Partition file contains one line per partition
+	self->partitions_count = pars_get_num_lines(tokens);
+	if (self->partitions_count >= MAX_PARTITIONS) {
+		ERROR_PRINT("fred_sys: maximum number of partitions exceeded\n");
+		pars_free_tokens(tokens);
+		return -1;
+	}
 
-    // Create partitions
-    for (int p = 0; p < self->partitions_count; ++p) {
-        // Partition name (first token in the line)
-        part_name = pars_get_token(tokens, p, 0);
-        // Number of slots (second token)
-        part_slots_count = str_to_size_(pars_get_token(tokens, p, 1));
+	// Create partitions
+	for (int p = 0; p < self->partitions_count; ++p) {
+		// Partition name (first token in the line)
+		part_name = pars_get_token(tokens, p, 0);
+		// Number of slots (second token)
+		part_slots_count = str_to_size_(pars_get_token(tokens, p, 1));
 
-        // Initialize partition
-        retval = partition_init(&self->partitions[p], part_name, p);
-        if (retval < 0) {
-            ERROR_PRINT("fred_sys: error: unable to initialize partition %s\n", part_name);
-            pars_free_tokens(tokens);
-            return -1;
-        }
+		// Initialize partition
+		retval = partition_init(&self->partitions[p], part_name, p);
+		if (retval < 0) {
+			ERROR_PRINT("fred_sys: error: unable to initialize partition %s\n", part_name);
+			pars_free_tokens(tokens);
+			return -1;
+		}
 
-        // Populate each slot
-        for (int s = 0; s < part_slots_count; ++s) {
-            // Init UIO device driver for slot and decoupler
-            // Names must match device tree names
-            sprintf(dev_name, "slot_p%u_s%u", p, s);
-            sprintf(dec_name, "pr_decoupler_p%u_s%u", p, s);
+		// Populate each slot
+		for (int s = 0; s < part_slots_count; ++s) {
+			// Init UIO device driver for slot and decoupler
+			// Names must match device tree names
+			sprintf(dev_name, "slot_p%u_s%u", p, s);
+			sprintf(dec_name, "pr_decoupler_p%u_s%u", p, s);
 
-            // Create a new slot
-            retval = slot_init(&slot, hw_config, s, dev_name, dec_name, scheduler);
-            if (retval) {
-                ERROR_PRINT("fred_sys: error: unable to initialize slot %u of "
-                            "partition %s\n", s, part_name);
-                pars_free_tokens(tokens);
-                return -1;
-            }
+			// Create a new slot
+			retval = slot_init(&slot, hw_config, s, dev_name, dec_name, scheduler);
+			if (retval) {
+				ERROR_PRINT("fred_sys: error: unable to initialize slot %u of "
+							"partition %s\n", s, part_name);
+				pars_free_tokens(tokens);
+				return -1;
+			}
 
-            // Create e new slot timer
-            retval = slot_timer_init(&timer, scheduler);
-            if (retval) {
-                ERROR_PRINT("fred_sys: error: unable to initialize slot timer %u of "
-                            "partition %s\n", s, part_name);
+			// Create e new slot timer
+			retval = slot_timer_init(&timer, scheduler);
+			if (retval) {
+				ERROR_PRINT("fred_sys: error: unable to initialize slot timer %u of "
+							"partition %s\n", s, part_name);
 
-                pars_free_tokens(tokens);
-                return -1;
-            }
+				pars_free_tokens(tokens);
+				return -1;
+			}
 
-            // And add to the partition
-            partition_add_slot(self->partitions[p], slot, timer);
-        }
-    }
-    return 0;
+			// And add to the partition
+			partition_add_slot(self->partitions[p], slot, timer);
+		}
+	}
+	return 0;
 }
 
 static int build_hw_tasks_(struct sys_layout *self, const char *hw_tasks_file)
@@ -145,7 +145,7 @@ static int build_hw_tasks_(struct sys_layout *self, const char *hw_tasks_file)
 
 	// Read hw-tasks tokens
 	// FRED_PATH is not inserted by the user but chosen at compile time
-	strcpy(hw_tasks_path, FRED_PATH);
+	strcpy(hw_tasks_path, STR(FRED_PATH));
 	strncat(hw_tasks_path, hw_tasks_file, sizeof(hw_tasks_path) - strlen(hw_tasks_path) - 1);
 	retval = pars_tokenize(&tokens, hw_tasks_path);
 	if (retval < 0)
