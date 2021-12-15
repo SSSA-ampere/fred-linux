@@ -1,0 +1,30 @@
+cmake_minimum_required(VERSION 3.0)
+project(fred-server LANGUAGES C)
+
+# default installation path
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set (CMAKE_INSTALL_PREFIX "/opt/fredsys/"
+           CACHE PATH "default install path" FORCE)
+endif()
+
+set(CMAKE_C_FLAGS "-std=gnu99 -Wall -Werror -fpic -D LOG_GLOBAL_LEVEL=LOG_LEV_FULL -D HW_TASKS_A64 -DFRED_PATH=\"${CMAKE_INSTALL_PREFIX}\" -Wno-unused-but-set-variable")
+
+file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/*.c */*.c)
+
+add_executable(${CMAKE_PROJECT_NAME} ${SRC_FILES})
+
+target_include_directories(${CMAKE_PROJECT_NAME}
+ PRIVATE
+    .
+    hw_support 
+    shared_kernel  
+    shared_user  
+    srv_core  
+    srv_core_mocks  
+    srv_support  
+    utils
+)
+
+install(TARGETS ${CMAKE_PROJECT_NAME}
+        DESTINATION bin
+)

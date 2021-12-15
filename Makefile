@@ -2,9 +2,11 @@ BIN = fred-server
 SRCS = $(wildcard *.c) $(wildcard **/*.c)
 OBJS = $(SRCS:.c=.o)
 DEPS = $(OBJS:.o=.d)
+FRED_PATH = /opt/fredsys/
 
 CFLAGS += -std=gnu99 -Wall -g
-CPPFLAGS += -D LOG_GLOBAL_LEVEL=LOG_LEV_FULL -D HW_TASKS_A64
+# CPPFLAGS += -D LOG_GLOBAL_LEVEL=LOG_LEV_FULL -D HW_TASKS_A64 -D FRED_PATH=${FRED_PATH}
+CPPFLAGS += -Wno-unused-but-set-variable -D LOG_GLOBAL_LEVEL=LOG_LEV_FULL -D HW_TASKS_A64 -DFRED_PATH="${FRED_PATH}"
 
 $(BIN): $(OBJS)
 	$(CC) $^ -o $@ $(LDFLAGS)
