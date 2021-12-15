@@ -16,8 +16,8 @@ $(BIN): $(OBJS)
 
 # Pattern rule for generating makefiles rules based
 # on headers includes dependencies using the C preprocessor
-%.d: %.c
-	$(CPP) $< -MM -MT $(@:.d=.o) > $@
+# %.d: %.c
+# 	$(CPP) $< -MM -MT $(@:.d=.o) > $@
 
 .PHONY: clean
 clean:
