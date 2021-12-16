@@ -9,11 +9,11 @@ endif()
 
 set(CMAKE_C_FLAGS "-std=gnu99 -Wall -Werror -fpic -D LOG_GLOBAL_LEVEL=LOG_LEV_FULL -D HW_TASKS_A64 -DFRED_PATH=\"${CMAKE_INSTALL_PREFIX}\" -Wno-unused-but-set-variable")
 
-file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/*.c */*.c)
+file(GLOB SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.c */*.c)
 
-add_executable(${CMAKE_PROJECT_NAME} ${SRC_FILES})
+add_executable(${PROJECT_NAME} ${SRC_FILES})
 
-target_include_directories(${CMAKE_PROJECT_NAME}
+target_include_directories(${PROJECT_NAME}
  PRIVATE
     .
     hw_support 
@@ -25,6 +25,6 @@ target_include_directories(${CMAKE_PROJECT_NAME}
     utils
 )
 
-install(TARGETS ${CMAKE_PROJECT_NAME}
+install(TARGETS ${PROJECT_NAME}
         DESTINATION bin
 )
