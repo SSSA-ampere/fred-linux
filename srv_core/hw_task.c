@@ -194,9 +194,6 @@ int hw_task_init(struct hw_task **self, uint32_t hw_id, const char *name,
 	// variable ‘part_name’ set but not used [-Werror=unused-but-set-variable]
 	// however this is not true. For now, I will disable this warning but it asks further investigation.
 	const char *part_name;
-	//char fred_path[MAX_PATH];
-
-	//strcpy(fred_path,STR(FRED_PATH));
 
 	// Allocate and set everything to 0
 	*self = calloc(1, sizeof(**self));
@@ -216,9 +213,6 @@ int hw_task_init(struct hw_task **self, uint32_t hw_id, const char *name,
 	// One bitstream for each slot in the partition
 	for (int i = 0; i < bits_count; ++i) {
 		// Build bistream path with name
-        // TODO 
-        // error: '%s' directive writing up to 127 bytes into a region of size between 0 and 1023 [-Werror=format-overflow=]
-        // |   219 |   sprintf(bit_path, "%s%s/%s/%s_s%u.bin",
 		sprintf(bit_path, "%s%s/%s/%s_s%u.bin",
 				STR(FRED_PATH), bits_path, part_name, (*self)->name, i);
 
