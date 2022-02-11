@@ -3,6 +3,8 @@ Fred for Linux. Experimental support.
 Copyright (C) 2018-2021, Marco Pagani, ReTiS Lab.
 <marco.pag(at)outlook.com>
 
+# :no_entry_sign: DEPRECATED
+
 Tutorial and how to build available [here](https://gitlab.retis.santannapisa.it/m.pagani/fred-docs).
 
 ### Reference:
